@@ -278,8 +278,8 @@ Do not share this code.
 #   non-permanent session (remember unchecked) instead expires when the
 #   browser closes.
 app.config["SESSION_COOKIE_HTTPONLY"] = True
-app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-app.config["SESSION_COOKIE_SECURE"] = os.environ.get("COOKIE_SECURE", "").lower() in ("1", "true", "yes")
+app.config["SESSION_COOKIE_SAMESITE"] = "None"
+app.config["SESSION_COOKIE_SECURE"] = True
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
 
 # CORS: a wildcard origin combined with credentialed requests (cookies) is
