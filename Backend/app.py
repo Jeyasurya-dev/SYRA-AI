@@ -12,6 +12,7 @@ import zipfile
 import uuid
 import base64
 import hmac
+from email.utils import formataddr
 from datetime import datetime, timedelta
 
 import pandas as pd
@@ -2736,7 +2737,7 @@ def send_otp():
 
     data = request.get_json() or {}
 
-    email = data.get("email", "").strip()
+    email = data.get("email", "").strip().lower()
 
     if not email:
         return jsonify({
@@ -2746,68 +2747,79 @@ def send_otp():
 
     otp = str(random.randint(100000, 999999))
 
-    print("OTP:", otp)
-    print("EMAIL_ADDRESS:", os.getenv("EMAIL_ADDRESS"))
-    print("EMAIL_PASSWORD exists:", bool(os.getenv("EMAIL_PASSWORD")))
-
     otp_store[email] = {
         "otp": otp,
         "expires": datetime.utcnow() + timedelta(minutes=OTP_EXPIRE_MINUTES)
     }
 
+    headers = {
+        "accept": "application/json",
+        "api-key": os.getenv("BREVO_API_KEY"),
+        "content-type": "application/json"
+    }
+
+    payload = {
+        "sender": {
+            "name": "SYRA AI",
+            "email": "suryasivalai04@gmail.com"
+        },
+        "to": [
+            {
+                "email": email
+            }
+        ],
+        "subject": "SYRA Login OTP",
+        "htmlContent": f"""
+        <html>
+        <body style="font-family:Arial,sans-serif">
+            <h2>SYRA AI</h2>
+
+            <p>Your One-Time Password (OTP) is:</p>
+
+            <h1 style="letter-spacing:4px;">{otp}</h1>
+
+            <p>This OTP is valid for <b>5 minutes</b>.</p>
+
+            <p>Do not share this OTP with anyone.</p>
+        </body>
+        </html>
+        """
+    }
+
     try:
 
-        msg = EmailMessage()
-        msg["Subject"] = "SYRA Login OTP"
-        msg["From"] = os.getenv("EMAIL_ADDRESS")
-        msg["To"] = email
+        response = requests.post(
+            "https://api.brevo.com/v3/smtp/email",
+            headers=headers,
+            json=payload,
+            timeout=30
+        )
 
-        msg.set_content(f"""
-Your SYRA Login OTP
+        if response.status_code in (200, 201):
 
-OTP: {otp}
+            return jsonify({
+                "ok": True,
+                "message": "OTP sent successfully"
+            })
 
-Valid for 5 minutes.
-
-Do not share this OTP.
-""")
-
-        context = ssl.create_default_context()
-
-        with smtplib.SMTP("smtp.gmail.com", 587) as smtp:
-            smtp.ehlo()
-            smtp.starttls(context=context)
-            smtp.ehlo()
-
-            smtp.login(
-               os.getenv("EMAIL_ADDRESS"),
-               os.getenv("EMAIL_PASSWORD")
-            )
-
-
-            smtp.send_message(msg)
-
-        print("Email sent successfully to:", email)
+        print(response.status_code)
+        print(response.text)
 
         return jsonify({
-            "ok": True,
-            "message": "OTP sent successfully"
-        })
+            "ok": False,
+            "message": response.text
+        }), 500
 
     except Exception as e:
 
-        import traceback
-        traceback.print_exc()
-
-        print("OTP Error:", repr(e))
-        print("EMAIL_ADDRESS:", os.getenv("EMAIL_ADDRESS"))
-        print("EMAIL_PASSWORD exists:", bool(os.getenv("EMAIL_PASSWORD")))
+        print("Brevo Error:", e)
 
         return jsonify({
             "ok": False,
             "message": str(e)
         }), 500
-    
+
+
 @app.route("/api/verify-otp", methods=["POST"])
 def verify_otp():
 
