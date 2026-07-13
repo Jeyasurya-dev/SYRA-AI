@@ -2791,11 +2791,17 @@ Do not share this OTP.
         })
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
 
-        return jsonify({
-            "ok":False,
-            "message":str(e)
-        }),500
+        print("OTP Error:", repr(e))
+        print("EMAIL_ADDRESS:", os.getenv("EMAIL_ADDRESS"))
+        print("EMAIL_PASSWORD exists:", bool(os.getenv("EMAIL_PASSWORD")))
+
+    return jsonify({
+        "ok": False,
+        "message": str(e)
+    }), 500
     
 @app.route("/api/verify-otp", methods=["POST"])
 def verify_otp():
