@@ -21,7 +21,7 @@
   // Same backend the application half of the app talks to (script.js).
   // Duplicated as a plain constant (not shared logic) so this file stays
   // fully self-contained and can be dropped into any page unmodified.
-  const API_BASE = "http://127.0.0.1:5000";
+  const API_BASE = "https://syra-backend.onrender.com";
   const CACHED_USER_KEY = "syra_user";
   const REMEMBER_KEY = "syra_remember_me";
 
