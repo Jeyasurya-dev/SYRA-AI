@@ -103,20 +103,23 @@ for folder in [PUBLIC_FOLDER, UPLOAD_FOLDER, PROJECTS_FOLDER, MEMORY_FOLDER, VOI
 # =============================================================================
 # FIREBASE ADMIN SDK INIT (Google Sign-In) — initialized exactly once
 # =============================================================================
-FIREBASE_SERVICE_ACCOUNT_PATH = os.path.join(BASE_DIR, "firebase-service-account.json")
+import json
 
 if not firebase_admin._apps:
-    if os.path.exists(FIREBASE_SERVICE_ACCOUNT_PATH):
-        try:
-            _firebase_cred = credentials.Certificate(FIREBASE_SERVICE_ACCOUNT_PATH)
-            firebase_admin.initialize_app(_firebase_cred)
-            print("Firebase Admin SDK initialized.")
-        except Exception as _firebase_init_err:
-            print(f"WARNING: Failed to initialize Firebase Admin SDK: {_firebase_init_err}. "
-                  f"Google Sign-In (/api/google-login) will not work until this is fixed.")
-    else:
-        print(f"WARNING: {FIREBASE_SERVICE_ACCOUNT_PATH} not found. "
-              f"Google Sign-In (/api/google-login) will not work until this file is added.")
+    try:
+        firebase_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT")
+
+        if firebase_json:
+            cred_dict = json.loads(firebase_json)
+            firebase_admin.initialize_app(
+                credentials.Certificate(cred_dict)
+            )
+            print("Firebase Admin SDK initialized from environment.")
+        else:
+            print("WARNING: FIREBASE_SERVICE_ACCOUNT environment variable not found.")
+
+    except Exception as e:
+        print(f"WARNING: Firebase initialization failed: {e}")
 
 app = Flask(__name__, static_folder=PUBLIC_FOLDER, static_url_path="")
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
