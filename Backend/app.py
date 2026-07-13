@@ -2774,12 +2774,16 @@ Do not share this OTP.
 
         context = ssl.create_default_context()
 
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as smtp:
+        with smtplib.SMTP("smtp.gmail.com", 587) as smtp:
+            smtp.ehlo()
+            smtp.starttls(context=context)
+            smtp.ehlo()
 
             smtp.login(
-                os.getenv("EMAIL_ADDRESS"),
-                os.getenv("EMAIL_PASSWORD")
+               os.getenv("EMAIL_ADDRESS"),
+               os.getenv("EMAIL_PASSWORD")
             )
+
 
             smtp.send_message(msg)
 
