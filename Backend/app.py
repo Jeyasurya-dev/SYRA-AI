@@ -2734,20 +2734,21 @@ def api_register():
 @app.route("/api/send-otp", methods=["POST"])
 def send_otp():
 
-    data = request.get_json()
+    data = request.get_json() or {}
 
-    email = data.get("email","").strip()
+    email = data.get("email", "").strip()
 
     if not email:
         return jsonify({
             "ok": False,
             "message": "Email required"
-        }),400
+        }), 400
 
-    otp = str(random.randint(100000,999999))
+    otp = str(random.randint(100000, 999999))
+
     print("OTP:", otp)
     print("EMAIL_ADDRESS:", os.getenv("EMAIL_ADDRESS"))
-    print("EMAIL_PASSWORD:", os.getenv("EMAIL_PASSWORD"))
+    print("EMAIL_PASSWORD exists:", bool(os.getenv("EMAIL_PASSWORD")))
 
     otp_store[email] = {
         "otp": otp,
@@ -2762,20 +2763,18 @@ def send_otp():
         msg["To"] = email
 
         msg.set_content(f"""
-
 Your SYRA Login OTP
 
-OTP : {otp}
+OTP: {otp}
 
 Valid for 5 minutes.
 
 Do not share this OTP.
-
 """)
 
         context = ssl.create_default_context()
 
-        with smtplib.SMTP_SSL("smtp.gmail.com",465,context=context) as smtp:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as smtp:
 
             smtp.login(
                 os.getenv("EMAIL_ADDRESS"),
@@ -2783,14 +2782,16 @@ Do not share this OTP.
             )
 
             smtp.send_message(msg)
-            print("Email sent successfully to:", email)
+
+        print("Email sent successfully to:", email)
 
         return jsonify({
-            "ok":True,
-            "message":"OTP sent successfully"
+            "ok": True,
+            "message": "OTP sent successfully"
         })
 
     except Exception as e:
+
         import traceback
         traceback.print_exc()
 
@@ -2798,10 +2799,10 @@ Do not share this OTP.
         print("EMAIL_ADDRESS:", os.getenv("EMAIL_ADDRESS"))
         print("EMAIL_PASSWORD exists:", bool(os.getenv("EMAIL_PASSWORD")))
 
-    return jsonify({
-        "ok": False,
-        "message": str(e)
-    }), 500
+        return jsonify({
+            "ok": False,
+            "message": str(e)
+        }), 500
     
 @app.route("/api/verify-otp", methods=["POST"])
 def verify_otp():
