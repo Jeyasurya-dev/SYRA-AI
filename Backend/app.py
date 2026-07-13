@@ -2898,12 +2898,17 @@ def api_google_login():
         }), 400
 
     try:
+        print("Firebase Project ID:", firebase_admin.get_app().project_id)
         decoded_token = firebase_auth.verify_id_token(id_token)
     except Exception as e:
-        return jsonify({
-            "ok": False,
-            "message": f"Invalid or expired token: {e}"
-        }), 401
+        import traceback
+        traceback.print_exc()
+        print("Google Login Verify Error:", repr(e))
+
+    return jsonify({
+        "ok": False,
+        "message": str(e)
+    }), 401
 
     uid = decoded_token.get("uid")
     email = (decoded_token.get("email") or "").strip().lower()
