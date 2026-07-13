@@ -1,0 +1,7 @@
+flask
+pandas
+flask-cors
+werkzeug
+numpy
+scikit-learn
+python-pptx

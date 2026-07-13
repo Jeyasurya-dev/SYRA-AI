@@ -1,0 +1,38 @@
+# Backend Secrets
+Backend/.env
+Backend/API.env
+Backend/firebase-service-account.json
+
+# Database
+Backend/*.db
+Backend/instance/
+Backend/syra.db
+
+# User Data
+Backend/auth_data/
+Backend/memory/
+Backend/voices/
+
+# Generated Files
+Backend/generated_projects/
+Backend/uploaded_datasets/
+
+# Python
+Backend/venv/
+Backend/__pycache__/
+**/__pycache__/
+*.pyc
+
+# Node
+Backend/node_modules/
+Frontend/node_modules/
+
+# VS Code
+.vscode/
+Backend/.vscode/
+
+# Logs
+*.log
+
+# Wheels
+*.whl

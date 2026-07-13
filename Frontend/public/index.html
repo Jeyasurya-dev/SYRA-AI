@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SYRA AI</title>
+
+<link rel="icon" href="assets/Logo.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="auth.css">
+</head>
+
+<body>
+
+<!-- =====================================================================
+     HOME SECTION (Primary Dashboard View)
+     ===================================================================== -->
+<div id="homeSection" style="display:block">
+
+  <header id="homeHeader">
+    <div class="header-left" id="headerBrand">
+      <button class="btn outline home-menu-btn" id="homeMenuToggle" onclick="toggleHomeMenu()">
+        <i class="fas fa-bars"></i>
+      </button>
+      <img src="assets/Logo.png" id="brandLogo" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100'">
+      <div>
+        <h2 id="brandTitle">SYRA AI</h2>
+        <span id="brandSub">Your Smart AI Assistant</span>
+      </div>
+    </div>
+    <div id="headerAuthActions">
+      <button id="loginBtn" class="btn outline" onclick="openLogin()">Login</button>
+      <button class="btn outline" id="logoutBtn" onclick="logout()" style="display:none">Logout</button>
+    </div>
+  </header>
+
+  <div class="menu-overlay" id="menuOverlay" onclick="toggleHomeMenu()"></div>
+
+  <div class="wrap" id="mainDashboardWrapper">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="panel" id="sidePanel">
+      <div class="profile-card" id="userProfileCard">
+        <div class="avatar-wrap" id="avatarContainer">
+          <div class="avatar" id="avatarBox">
+            <img id="avatarImg" alt="User avatar">
+            <span id="avatarInitial">G</span>
+          </div>
+          <div class="edit-avatar" id="btnEditAvatar" title="Edit photo" onclick="triggerUpload()">✏️</div>
+          <input type="file" id="avatarInput" accept="image/*" hidden>
+        </div>
+
+        <div class="profile-meta" id="profileMetaContainer">
+          <h3 id="profileName">Guest User</h3>
+          <p id="profileEmail">guest@syra.ai</p>
+        </div>
+      </div>
+
+      <div class="links" id="sidebarLinksList">
+        <div class="link" id="linkNewChat" onclick="openChat()"><span>💬 New Chat</span><span class="badge">Start</span></div>
+        <div class="link" id="linkCoding" onclick="openSpecializedChat('code')"><span>💻 Coding Assistant</span><span class="badge">AI</span></div>
+        <div class="link" id="linkStudy" onclick="openSpecializedChat('agri')"><span>🌾 Agro Assistant</span><span class="badge">Learn</span></div>
+        <div class="link" id="linkWriting" onclick="openSpecializedChat('website')"><span>✍️ Web Builder</span><span class="badge">Create</span></div>
+        <div class="link" id="linkTranslation" onclick="openSpecializedChat('general')"><span>🌐 Translation</span><span class="badge">Translate</span></div>
+        <div class="link" id="linkSettings" onclick="openSettings()"><span>⚙️ Settings</span><span class="badge">Manage</span></div>
+      </div>
+    </aside>
+
+    <!-- MAIN DASHBOARD CONTENT -->
+    <main class="main" id="dashboardMainArea">
+      <div class="main-header-row" id="mainHeaderRow">
+        <h3 id="dashboardTitle" style="font-weight:800;letter-spacing:1px">SYRA AI</h3>
+        <button class="btn primary" id="btnOpenMainChat" onclick="openChat()">
+          🤖 OPEN CHAT
+        </button>
+      </div>
+
+      <p id="dashboardIntro" style="color:var(--muted);margin:14px 0">
+        SYRA AI is your intelligent companion for deep reasoning, streaming chat, instant coding, website building, automated project creation, and image generation.
+      </p>
+
+      <div class="cards" id="dashboardFeatureGrid">
+        <div class="card" id="cardChat" onclick="openChat()">
+          <h4>💬 Multi-Model AI Chat</h4>
+          <p>Interact with GPT-4, Gemini, Claude, or DeepSeek-R1 with high-fidelity streaming responses.</p>
+        </div>
+        <div class="card" id="cardCode" onclick="openSpecializedChat('code')">
+          <h4>💻 Advanced Coding Assistant</h4>
+          <p>Generate clean, refactored, syntax-highlighted code in dozens of engineering frameworks.</p>
+        </div>
+        <div class="card" id="cardWebBuilder" onclick="openSpecializedChat('website')">
+          <h4>🌐 Website AI Builder</h4>
+          <p>Produce full operational websites, complete with styling, interactions, and a live code preview.</p>
+        </div>
+        <div class="card" id="cardAgri" onclick="openSpecializedChat('agri')">
+          <h4>🌾 Smart Agriculture</h4>
+          <p>Analyze crop diseases, obtain custom organic fertilizer schedules, and optimize harvests.</p>
+        </div>
+        <div class="card" id="cardWebSearch" onclick="openSearchTab()">
+          <h4>🧠 Deep Web Search</h4>
+          <p>Perform grounded web indexing to find real-time events, citations, and summaries.</p>
+        </div>
+        <div class="card" id="cardImageCreator" onclick="openImageTab()">
+          <h4>🎨 Text To Image Suite</h4>
+          <p>Synthesize, edit, upscale, recreate, or remove background elements using specialized neural systems.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- AI SUPPORT PANEL MODAL -->
+  <div id="supportPanel" class="support-panel">
+    <div class="support-box" id="supportBox">
+      <button class="close-support" id="btnCloseSupport" onclick="closeSupport()">✕</button>
+      <h2>🛟 AI Help & Support</h2>
+      <p>Welcome to SYRA AI assistance. Choose a channel to begin.</p>
+
+      <div class="support-card" id="supportFaq" onclick="showSupport('faq')">❓ Frequently Asked Questions</div>
+      <div class="support-card" id="supportReport" onclick="reportBug()">🐞 File Bug Report</div>
+      <div class="support-card" id="supportContact" onclick="contactSupport()">📧 Contact engineering team</div>
+      <div class="support-card" id="supportFeature" onclick="featureRequest()">💡 Suggest a new feature</div>
+
+      <div id="supportContent" class="support-dynamic-content"></div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       SYRA AI — AUTHENTICATION MODAL (Login / Register / OTP)
+       ===================================================================== -->
+  <div id="loginModal" class="auth-modal-overlay">
+    <div class="auth-modal" id="authBox">
+      <button class="auth-close-btn" id="btnCloseLogin" onclick="closeLogin()" aria-label="Close">✕</button>
+      <img src="assets/Logo.png" class="auth-logo-mark" alt="SYRA AI"
+           onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100'">
+      <h2 class="auth-title" id="authTitle">Welcome back</h2>
+      <p class="auth-subtitle" id="authSubtitle">Log in to continue to SYRA AI</p>
+      <div class="auth-error-banner" id="authErrorBanner"></div>
+
+      <div class="auth-step active" id="authStepMethods">
+        <button class="auth-social-btn auth-google-btn" id="btnGoogleLogin" onclick="googleLogin()">
+          <img src="assets/google.svg" alt="Google" onerror="this.style.display='none'">
+          Continue with Google
+        </button>
+        <button class="auth-social-btn auth-phone-btn" id="btnPhoneLogin" onclick="showPhoneLogin()">
+          📱 Continue with Phone
+        </button>
+        <div class="auth-divider"><span>or</span></div>
+        <button class="auth-social-btn auth-email-btn" id="btnShowEmailLogin" onclick="showEmailLogin()">
+          📧 Continue with Email
+        </button>
+        <p class="auth-switch-row">
+          <span id="authSwitchText">New to SYRA AI?</span>
+          <button type="button" id="authSwitchBtn" onclick="toggleAuthMode()">Register here</button>
+        </p>
+      </div>
+
+      <div class="auth-step" id="authStepEmail">
+        <button class="auth-back-btn" onclick="backToMethods()">← Back</button>
+        <input id="nameInput" class="auth-input" type="text" placeholder="Full Name" style="display:none" autocomplete="name">
+        <input id="emailInput" class="auth-input" type="email" placeholder="Email Address" autocomplete="email">
+        <button class="auth-primary-btn" id="btnSendOTP" onclick="sendOTP()">
+          <span class="auth-btn-label">Send OTP</span>
+        </button>
+      </div>
+
+      <div class="auth-step" id="authStepPhone">
+        <button class="auth-back-btn" onclick="backToMethods()">← Back</button>
+        <div class="auth-phone-row">
+          <select id="countryCode" class="auth-country-select">
+            <option value="+91" selected>🇮🇳 +91</option>
+            <option value="+1">🇺🇸 +1</option>
+            <option value="+44">🇬🇧 +44</option>
+            <option value="+61">🇦🇺 +61</option>
+            <option value="+971">🇦🇪 +971</option>
+            <option value="+65">🇸🇬 +65</option>
+          </select>
+          <input id="phoneInput" class="auth-input" type="tel" placeholder="Phone number" autocomplete="tel" inputmode="numeric">
+        </div>
+        <button class="auth-primary-btn" id="btnSendOTP" onclick="sendOTP()">
+          <span class="auth-btn-label">Send OTP</span>
+        </button>
+        <div id="recaptchaContainer"></div>
+      </div>
+
+      <div class="auth-step" id="authStepOtp">
+        <button class="auth-back-btn" onclick="backToEntry()">← Back</button>
+        <p class="auth-subtitle" style="margin-bottom:6px;">
+          Code sent to <strong id="otpTargetLabel"></strong>
+        </p>
+        <div class="auth-otp-row" id="otpBoxes">
+          <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code">
+          <input class="otp-box" type="text" inputmode="numeric" maxlength="1">
+          <input class="otp-box" type="text" inputmode="numeric" maxlength="1">
+          <input class="otp-box" type="text" inputmode="numeric" maxlength="1">
+          <input class="otp-box" type="text" inputmode="numeric" maxlength="1">
+          <input class="otp-box" type="text" inputmode="numeric" maxlength="1">
+        </div>
+        <button class="auth-primary-btn" id="btnVerifyOTP" onclick="verifyOTP()">
+          <span class="auth-btn-label">Verify OTP</span>
+        </button>
+        <div class="auth-otp-meta">
+          <span class="auth-resend-timer" id="authResendTimer"></span>
+          <button class="auth-resend-link" id="authResendBtn" onclick="resendOTP()" disabled>Resend OTP</button>
+        </div>
+      </div>
+
+      <div class="auth-step" id="authStepSuccess">
+        <div class="auth-success-wrap">
+          <div class="auth-success-check">✓</div>
+          <p class="auth-success-title">You're all set!</p>
+          <p class="auth-success-sub" id="authSuccessSub">You're logged in.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer" id="mainSiteFooter" role="contentinfo">
+    <div class="contacts" id="footerContactsRow">
+      <a href="mailto:syraaisupport@gmail.com" id="mailLink"><i class="fas fa-envelope"></i> zyraaisupport@gmail.com</a>
+      <a href="tel:+916379558565" id="phoneLink"><i class="fas fa-phone-alt"></i> +91 63795 58565</a>
+      <a href="#" onclick="openSupport(); return false;" id="supportLink"><i class="fas fa-comments"></i> AI Support</a>
+    </div>
+    <div class="copyright" id="footerCopyright">© <span id="year"></span> SYRA AI • All Rights Reserved</div>
+  </footer>
+</div>
+
+<!-- =====================================================================
+     CHAT SECTION (Advanced AI Workspace)
+     ===================================================================== -->
+<div id="chatSection">
+
+  <div class="chat-bg" id="chatBlurBackground"></div>
+  <div class="glow-a" id="glowLightA"></div>
+  <div class="glow-b" id="glowLightB"></div>
+
+  <button id="backBtn" class="chat-back-btn" onclick="backToHome()" title="Back to Home"> ← Back</button>
+  <button class="chat-menu-btn" id="btnChatMenuToggle" onclick="toggleChatMenu()">☰</button>
+
+  <!-- WORKSPACE SIDE MENU -->
+  <div class="side-menu" id="sideMenu">
+    <div class="menu-header" id="menuHeaderTitle">
+      <h3>SYRA Workspace</h3>
+      <button onclick="toggleChatMenu()">✕</button>
+    </div>
+
+    <div class="workspace-actions" id="workspaceHeaderActions">
+      <button class="new-chat" id="btnNewChat" onclick="newChat()">＋ New Session</button>
+      <button class="new-chat" id="btnOpenWebsiteBuilder" onclick="openWebsiteBuilder()">🧩 Website Builder</button>
+    </div>
+
+    <div class="search-chats-container" id="searchChatsBox">
+      <input type="text" id="chatSearchInput" placeholder="🔍 Search chat history..." oninput="filterChats()">
+    </div>
+
+    <div class="chat-folders" id="chatFoldersContainer">
+      <div class="folder-header" onclick="toggleFolder('all')">📂 All Dialogues</div>
+      <div id="chatHistory" class="chat-history-list"></div>
+    </div>
+
+    <div class="toggle-menu" id="historyFooterActions">
+      <button onclick="clearChats()" id="btnClearAllHistory">
+        <i class="fa-solid fa-trash"></i>
+        <span>Clear Session History</span>
+      </button>
+    </div>
+
+    <div class="menu-bottom" id="profileBadgeTrigger" onclick="handleMenuClick()">
+      <div class="menu-avatar" id="badgeAvatarBox"><span id="menuAvatarInitial">G</span></div>
+      <div id="badgeUserMeta">
+        <div id="menuName">Guest User</div>
+        <small id="badgeSubtext">Settings & Identity</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONVERSATION VIEWER FRAME -->
+  <div class="chat-wrap" id="conversationWrap">
+    <div class="chat-body" id="chat"></div>
+
+    <div class="generation-controls" id="generationControlBar" style="display:none">
+      <button id="btnStopGeneration" class="control-btn" onclick="stopGeneration()"><i class="fa-solid fa-stop"></i> Stop</button>
+      <button id="btnRegenerate" class="control-btn" onclick="regenerate()"><i class="fa-solid fa-arrow-rotate-right"></i> Regenerate</button>
+    </div>
+  </div>
+
+  <!-- POPUP ATTACHMENT MENU -->
+  <div class="popup-menu" id="popupMenu">
+    <div class="top-options" id="fileOptionsGrid">
+      <div class="option-card" onclick="triggerFileInput('camera')"><i class="fa-solid fa-camera"></i><span>Camera</span></div>
+      <div class="option-card" onclick="triggerFileInput('gallery')"><i class="fa-solid fa-image"></i><span>Gallery</span></div>
+      <div class="option-card" onclick="triggerFileInput('document')"><i class="fa-solid fa-file-invoice"></i><span>Files</span></div>
+    </div>
+    <input type="file" id="mediaFileInput" onchange="handleFileSelect()" style="display:none">
+
+    <div class="menu-items" id="aiActionList">
+      <div class="menu-item" onclick="triggerMenuAction('image')"><i class="fa-solid fa-wand-magic-sparkles"></i> <span>🎨 Create Image</span><small>Text to visual artwork</small></div>
+      
+      <div class="menu-item" onclick="triggerMenuAction('project')"><i class="fa-solid fa-folder-open"></i> <span>📂 Project Builder</span><small>Generate zip architectures</small></div>
+      <div class="menu-item" id="popupWebSearchToggle" onclick="toggleWebSearch()"><i class="fa-solid fa-globe"></i> <span>🌐 Web Search</span><small>Live crawling answers</small></div>
+      <div class="menu-item" id="popupDeepThinkToggle" onclick="toggleDeepThink()"><i class="fa-solid fa-brain"></i> <span>🧠 Deep Thinking</span><small>R1 chain-of-thought analysis</small></div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       CHAT INPUT BAR WITH MODE SWITCHER
+       ===================================================================== -->
+  <div class="chat-input-container" id="chatFormContainer">
+    <button class="plus-btn" id="btnAttachmentPlus" onclick="togglePopup()">＋</button>
+
+    <div class="input-field-wrapper" id="inputWrapper">
+      <!-- Mode Switcher Dropdown -->
+      <div class="mode-switcher-row">
+        <div class="mode-switcher" id="modeSwitcher">
+          <button class="mode-btn active" data-mode="general" onclick="setChatMode('general')">
+            <i class="fa-solid fa-comments"></i> Chat
+          </button>
+          <button class="mode-btn" data-mode="code" onclick="setChatMode('code')">
+            <i class="fa-solid fa-code"></i> Code
+          </button>
+          <button class="mode-btn" data-mode="image" onclick="setChatMode('image')">
+            <i class="fa-solid fa-image"></i> Image
+          </button>
+          <button class="mode-btn" data-mode="project" onclick="setChatMode('project')">
+            <i class="fa-solid fa-folder-tree"></i> Project
+          </button>
+        </div>
+        <!-- Active Mode Indicator Pill -->
+        <span class="mode-indicator-pill" id="modeIndicatorPill" style="display:none">
+          <i class="fa-solid fa-globe"></i> Web Builder Mode
+        </span>
+      </div>
+
+      <span class="pill-indicator" id="searchIndicator" style="display:none">🌐 Search Enabled</span>
+      <span class="pill-indicator" id="thinkIndicator" style="display:none">🧠 Thinking Enabled</span>
+      <textarea id="messageInput" placeholder="Ask SYRA AI anything..." rows="1"></textarea>
+    </div>
+
+    <button class="mic-btn" id="btnVoiceChat" onclick="startVoiceChat()"><i class="fa-solid fa-microphone"></i></button>
+    <button id="sendBtn" class="voice-btn" onclick="sendMessage()"><i class="fa-solid fa-arrow-up"></i></button>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-container" id="settingsLayout">
+      <div class="settings-top" id="settingsNavRow">
+        <button class="back-btn" id="btnBackFromSettings" onclick="closeSettings()">←</button>
+        <h2>SYRA AI Workspace Suite</h2>
+      </div>
+      <div class="profile-section" id="profileSettingsBanner">
+        <div class="profile-avatar" id="settingsAvatarBox">👤</div>
+        <h3 id="chatProfileName">Guest User</h3>
+        <button class="edit-profile-btn" id="btnSettingsEditProfile" onclick="openSetting('profile')">Edit Profile</button>
+      </div>
+      <div class="settings-list" id="settingsActionsPanel">
+        <div class="settings-card" onclick="openSetting('profile')"><i class="fas fa-user-circle"></i> Profile & Account</div>
+        <div class="settings-card" onclick="openSetting('appearance')"><i class="fas fa-palette"></i> Theme & Aesthetics</div>
+        <div class="settings-card" onclick="openSetting('models')"><i class="fas fa-microchip"></i> AI Engine Configuration</div>
+        <div class="settings-card" onclick="openSetting('voice')"><i class="fas fa-volume-up"></i> Voice & Sound Synthesis</div>
+        <div class="settings-card" onclick="openSetting('language')"><i class="fas fa-language"></i> Language Selection</div>
+        <div class="settings-card" onclick="clearChats()"><i class="fas fa-broom"></i> Reset Cache & Conversations</div>
+        <div class="settings-card" onclick="openSetting('security')"><i class="fas fa-shield-alt"></i> Encryption & Privacy</div>
+        <div class="settings-card" id="cardExportChats" onclick="openSetting('export')"><i class="fas fa-file-export"></i> Export Chats</div>
+        <div class="settings-card" id="cardPrivacyPolicy" onclick="openSetting('privacy-policy')"><i class="fas fa-file-contract"></i> Privacy Policy</div>
+        <div class="settings-card" id="cardTerms" onclick="openSetting('terms')"><i class="fas fa-file-signature"></i> Terms & Conditions</div>
+        <div class="settings-card" id="cardAbout" onclick="openSetting('about')"><i class="fas fa-circle-info"></i> About SYRA AI</div>
+        <div class="settings-card" id="cardDeleteAccount" onclick="openSetting('delete-account')"><i class="fas fa-user-slash"></i> Delete Account</div>
+        <div class="settings-card logout-card" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout Session</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS ACTION DETAIL VIEWER -->
+  <div class="setting-detail" id="settingDetail">
+    <div class="detail-box" id="detailBoxPanel">
+      <div class="detail-top" id="detailHeaderRow">
+        <button onclick="closeSettingDetail()">←</button>
+        <h3 id="detailTitle">Configuration Setting</h3>
+      </div>
+      <div id="detailContent" class="detail-main-content"></div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       AI WEBSITE BUILDER WORKSPACE — SPLIT SCREEN MODE
+       Left: Code Editor (HTML/CSS/JS tabs + Copy buttons) 
+       Right: Live Preview (Run Preview button + Device toggle + Download ZIP)
+       ===================================================================== -->
+  <div class="builder-panel" id="websiteBuilderPanel">
+    <div class="builder-container" id="builderContainer">
+      <div class="builder-top">
+        <button class="back-btn" onclick="closeWebsiteBuilder()" aria-label="Close">←</button>
+        <h2>🧩 AI Website Builder</h2>
+        <!-- Download ZIP Button -->
+        <button class="btn outline builder-download-zip" id="builderDownloadZipBtn" onclick="downloadBuilderZip()" style="display:none;margin-left:auto;">
+          <i class="fa-solid fa-file-zipper"></i> Download ZIP
+        </button>
+      </div>
+
+      <!-- SCROLLABLE MAIN AREA: fills the space between the header and the
+           fixed bottom prompt bar; contains the status line + split workspace -->
+      <div class="builder-main">
+        <div class="builder-status" id="builderStatus" style="display:none"></div>
+
+        <!-- SPLIT SCREEN WORKSPACE — 45% code / 55% preview -->
+        <div class="builder-split-workspace" id="builderSplitWorkspace" style="display:none">
+        <!-- LEFT PANEL: Code Editor -->
+        <div class="builder-code-panel">
+          <div class="builder-code-tabs">
+            <button type="button" class="builder-code-tab active" data-tab="html" onclick="switchBuilderCodeTab('html')">
+              <i class="fa-brands fa-html5"></i> HTML
+            </button>
+            <button type="button" class="builder-code-tab" data-tab="css" onclick="switchBuilderCodeTab('css')">
+              <i class="fa-brands fa-css3-alt"></i> CSS
+            </button>
+            <button type="button" class="builder-code-tab" data-tab="javascript" onclick="switchBuilderCodeTab('javascript')">
+              <i class="fa-brands fa-js"></i> JavaScript
+            </button>
+          </div>
+
+          <div class="builder-code-editor">
+            <div class="builder-code-pane active" data-pane="html">
+              <div class="builder-pane-toolbar">
+                <span><i class="fa-brands fa-html5"></i> index.html</span>
+              </div>
+              <div class="code-block-wrapper">
+                <pre class="builder-code" id="builderCodeHtml"></pre>
+                <button type="button" class="code-copy-btn" onclick="copyBuilderCode('html')" title="Copy code">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </div>
+            </div>
+            <div class="builder-code-pane" data-pane="css">
+              <div class="builder-pane-toolbar">
+                <span><i class="fa-brands fa-css3-alt"></i> style.css</span>
+              </div>
+              <div class="code-block-wrapper">
+                <pre class="builder-code" id="builderCodeCss"></pre>
+                <button type="button" class="code-copy-btn" onclick="copyBuilderCode('css')" title="Copy code">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </div>
+            </div>
+            <div class="builder-code-pane" data-pane="javascript">
+              <div class="builder-pane-toolbar">
+                <span><i class="fa-brands fa-js"></i> script.js</span>
+              </div>
+              <div class="code-block-wrapper">
+                <pre class="builder-code" id="builderCodeJavascript"></pre>
+                <button type="button" class="code-copy-btn" onclick="copyBuilderCode('javascript')" title="Copy code">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT PANEL: Live Preview -->
+        <div class="builder-preview-panel">
+          <div class="builder-preview-toolbar">
+            <span><i class="fa-solid fa-eye"></i> Live Preview</span>
+            <div class="builder-preview-actions">
+              <button type="button" class="preview-device-btn active" data-device="desktop" onclick="setPreviewDevice('desktop')" title="Desktop">
+                <i class="fa-solid fa-desktop"></i>
+              </button>
+              <button type="button" class="preview-device-btn" data-device="tablet" onclick="setPreviewDevice('tablet')" title="Tablet">
+                <i class="fa-solid fa-tablet-screen-button"></i>
+              </button>
+              <button type="button" class="preview-device-btn" data-device="mobile" onclick="setPreviewDevice('mobile')" title="Mobile">
+                <i class="fa-solid fa-mobile-screen-button"></i>
+              </button>
+              <button type="button" class="run-preview-btn" id="runPreviewBtn" onclick="runBuilderPreview()">
+                <i class="fa-solid fa-play"></i> Run Preview
+              </button>
+            </div>
+          </div>
+          <div class="builder-preview-frame-wrap" id="builderPreviewWrap">
+            <div class="builder-preview-placeholder" id="builderPreviewPlaceholder">
+              <div class="preview-placeholder-icon">🖥️</div>
+              <p>Click <strong>"Run Preview"</strong> to see your website</p>
+              <small>CSS animations & JavaScript will be fully applied</small>
+            </div>
+            <iframe class="builder-preview-frame" id="builderPreviewFrame" style="display:none"></iframe>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <!-- BOTTOM FIXED PROMPT BAR -->
+      <div class="builder-prompt-row">
+
+    <div class="builder-prompt-box">
+
+        <div class="builder-ai-icon">
+            ✨
+        </div>
+
+        <textarea
+            id="builderPromptInput"
+            rows="2"
+            placeholder="Describe the website you want SYRA to build..."
+        ></textarea>
+
+        <button
+            class="builder-generate-btn"
+            id="builderGenerateBtn"
+            onclick="generateWebsiteBuilder()">
+
+            <span>🚀</span>
+            <span>Generate</span>
+
+        </button>
+
+    </div>
+
+</div>
+
+<!-- Audio Player element for Speech Synthesis (TTS) -->
+<audio id="ttsAudio" style="display:none"></audio>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="firebase.js"></script>
+<script src="auth.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

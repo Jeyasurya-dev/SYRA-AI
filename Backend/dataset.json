@@ -1,0 +1,32 @@
+{
+  "data": [
+    {
+      "question": "hi",
+      "answer": "Hello! How can I help you?"
+    },
+    {
+      "question": "hello",
+      "answer": "Hi there! What do you need?"
+    },
+    {
+      "question": "what is agriculture",
+      "answer": "Agriculture is the practice of farming, including growing crops and rearing animals."
+    },
+    {
+      "question": "what is python",
+      "answer": "Python is a high-level programming language used for web, AI, data science and automation."
+    },
+    {
+      "question": "rice disease",
+      "answer": "Common rice diseases include blast, brown spot, and bacterial leaf blight."
+    },
+    {
+      "question": "fertilizer for rice",
+      "answer": "Urea, DAP, and Potash are commonly used fertilizers for rice crops."
+    },
+    {
+      "question": "bye",
+      "answer": "Goodbye! Have a nice day."
+    }
+  ]
+}

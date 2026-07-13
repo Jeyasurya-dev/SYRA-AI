@@ -1,0 +1,84 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Create venv",
+      "type": "shell",
+      "command": "${config:python.pythonPath ? config:python.pythonPath : 'python'} -m venv venv",
+      "problemMatcher": []
+    },
+    {
+      "label": "Install requirements",
+      "type": "shell",
+      "command": "${workspaceFolder}/venv/bin/pip install -r requirements.txt",
+      "windows": {
+        "command": "${workspaceFolder}\\venv\\Scripts\\pip.exe install -r requirements.txt"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Flask (venv flask run - Unix)",
+      "type": "shell",
+      "command": "FLASK_APP=app.py FLASK_ENV=development ${workspaceFolder}/venv/bin/flask run --host=0.0.0.0 --port=5000",
+      "windows": {
+        "command": "set FLASK_APP=app.py && set FLASK_ENV=development && ${workspaceFolder}\\venv\\Scripts\\flask.exe run --host=0.0.0.0 --port=5000"
+      },
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Flask (venv python app.py - cross-platform)",
+      "type": "shell",
+      "command": "${workspaceFolder}/venv/bin/python app.py",
+      "windows": {
+        "command": "${workspaceFolder}\\venv\\Scripts\\python.exe app.py"
+      },
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Serve frontend (live-server via npx)",
+      "type": "shell",
+      "command": "npx live-server --port=5500 --open=./",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Serve frontend (http.server - python)",
+      "type": "shell",
+      "command": "${config:python.pythonPath ? config:python.pythonPath : 'python'} -m http.server 8000",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Start Dev (Flask + Frontend)",
+      "dependsOn": [
+        "Run Flask (venv flask run - Unix)",
+        "Serve frontend (live-server via npx)"
+      ],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    },
+    {
+      "label": "Start Dev (Flask + Frontend - fallback)",
+      "dependsOn": [
+        "Run Flask (venv python app.py - cross-platform)",
+        "Serve frontend (http.server - python)"
+      ],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    }
+  ]
+}

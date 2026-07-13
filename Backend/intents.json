@@ -1,0 +1,38 @@
+{
+  "intents": [
+    {
+      "tag": "greeting",
+      "patterns": ["hi", "hello", "hey", "good morning"],
+      "responses": ["Hello!", "Hi there!", "Hey! How can I help you?"]
+    },
+    {
+      "tag": "goodbye",
+      "patterns": ["bye", "see you", "good night"],
+      "responses": ["Goodbye!", "See you later!", "Take care!"]
+    },
+    {
+      "tag": "python",
+      "patterns": ["what is python", "define python", "python language"],
+      "responses": [
+        "Python is a popular programming language used for AI, web and data science.",
+        "Python is easy to learn and powerful."
+      ]
+    },
+    {
+      "tag": "agriculture",
+      "patterns": ["what is agriculture", "define agriculture"],
+      "responses": [
+        "Agriculture is the science and practice of farming.",
+        "It involves crop cultivation and animal rearing."
+      ]
+    },
+    {
+      "tag": "rice_disease",
+      "patterns": ["rice disease", "disease in rice plant"],
+      "responses": [
+        "Rice blast and bacterial leaf blight are common diseases.",
+        "Proper irrigation and fungicide control help reduce rice diseases."
+      ]
+    }
+  ]
+}
