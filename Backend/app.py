@@ -2654,6 +2654,9 @@ def _ensure_csrf_token():
 
 @app.before_request
 def _enforce_csrf():
+    print("Path:", request.path)
+    print("Header CSRF:", request.headers.get("X-CSRF-Token"))
+    print("Session CSRF:", session.get("csrf_token"))
     if request.method not in ("POST", "PUT", "PATCH", "DELETE"):
         return None
     if not request.path.startswith("/api/"):
@@ -2665,6 +2668,7 @@ def _enforce_csrf():
     if not sent or not expected or not hmac.compare_digest(sent, expected):
         return jsonify(ok=False, success=False, error="Invalid or missing CSRF token"), 403
     return None
+
 
 @app.route("/api/csrf-token", methods=["GET"])
 def api_csrf_token():
