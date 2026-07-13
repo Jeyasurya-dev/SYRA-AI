@@ -9,7 +9,7 @@
    it only *reads* the cached user profile (written by auth.js) when a
    feature needs to tag a request with the current user's identity.
    ===================================================================== */
-const API_BASE = "http://127.0.0.1:5000";
+const API_BASE = "https://syra-backend.onrender.com";
 
 // Local storage key auth.js uses to cache the logged-in user's profile.
 // Declared here (read-only) so app features can identify the current
