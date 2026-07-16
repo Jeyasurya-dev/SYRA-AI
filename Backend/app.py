@@ -293,7 +293,10 @@ app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
 # CORS: a wildcard origin combined with credentialed requests (cookies) is
 # unsafe and rejected by most browsers anyway. Configure real origins via
 # ALLOWED_ORIGINS env var (comma-separated). Defaults to localhost for dev.
-_allowed_origins = os.environ.get("ALLOWED_ORIGINS", "http://localhost:5000,http://127.0.0.1:5000,https://syra-ai.netlify.app,https://syra-ai-seven.vercel.app/")
+_allowed_origins = os.environ.get(
+    "ALLOWED_ORIGINS",
+    "http://localhost:5000,http://127.0.0.1:5000,https://syra-ai.netlify.app,https://syra-ai-seven.vercel.app"
+)
 CORS(app, supports_credentials=True, origins=[o.strip() for o in _allowed_origins.split(",") if o.strip()])
 
 # =============================================================================
