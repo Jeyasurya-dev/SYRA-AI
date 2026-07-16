@@ -18,6 +18,7 @@ scikit-learn
 beautifulsoup4
 lxml
 
+google-genai
 google-generativeai
 openai
 replicate

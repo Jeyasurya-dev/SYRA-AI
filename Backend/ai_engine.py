@@ -23,6 +23,9 @@
 import os
 import json
 import requests
+from PIL import Image
+import tempfile
+from google import genai
 from dotenv import load_dotenv
 
 load_dotenv("API.env")
@@ -569,3 +572,30 @@ def cloudflare_speech_to_text(audio_path):
         raise RuntimeError(str(data))
 
     return data.get("result", {}).get("text", "")
+
+def analyze_image(image_file, prompt="Analyze this image in detail."):
+    """
+    Analyze an uploaded image using Gemini Vision.
+    """
+
+    try:
+        client = genai.Client(api_key=GEMINI_API_KEY)
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
+            image_file.save(tmp.name)
+
+            img = Image.open(tmp.name)
+
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=[
+                    prompt,
+                    img
+                ]
+            )
+
+        return response.text
+
+    except Exception as e:
+        print(f"[ai_engine] Vision error: {e}")
+        return None

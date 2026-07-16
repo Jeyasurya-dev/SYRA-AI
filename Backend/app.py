@@ -12,7 +12,10 @@ import zipfile
 import uuid
 import base64
 import hmac
+import tempfile
+from PIL import Image
 from email.utils import formataddr
+from google import genai
 from datetime import datetime, timedelta
 
 import pandas as pd
@@ -44,6 +47,7 @@ from firebase_admin import credentials, auth as firebase_auth
 # and streaming chat all go through this module — see ai_engine.py for the
 # single source of truth on providers/models and fallback chains).
 from ai_engine import generate_ai_reply, generate_ai_reply_stream, FRIENDLY_ERROR, get_provider_chain, cloudflare_speech_to_text
+from ai_engine import analyze_image
 
 load_dotenv()
 
@@ -2205,42 +2209,97 @@ def api_upload_dataset():
 # VISION AI
 # =============================================================================
 @app.route("/api/vision", methods=["POST"])
-def api_vision():
-    """Accepts either a multipart image upload (field 'image') or a JSON
-    body with an 'image_url'/'image_data_url', plus an optional 'question'."""
+def vision():
+
+    if "image" not in request.files:
+        return jsonify({
+            "ok": False,
+            "message": "No image uploaded"
+        }), 400
+
+    image = request.files["image"]
+
+    if image.filename == "":
+        return jsonify({
+            "ok": False,
+            "message": "No image selected"
+        }), 400
+
+    ALLOWED_EXTENSIONS = {
+        "jpg",
+        "jpeg",
+        "png",
+        "webp",
+        "gif"
+    }
+
+    extension = image.filename.rsplit(".", 1)[-1].lower()
+
+    if extension not in ALLOWED_EXTENSIONS:
+        return jsonify({
+            "ok": False,
+            "message": "Only JPG, JPEG, PNG, WEBP and GIF images are allowed."
+        }), 400
+
+    MAX_IMAGE_SIZE = 25 * 1024 * 1024  # 25 MB
+
+    image.seek(0, os.SEEK_END)
+    size = image.tell()
+    image.seek(0)
+
+    if size > MAX_IMAGE_SIZE:
+        return jsonify({
+            "ok": False,
+            "message": "Maximum image size is 25 MB."
+        }), 400
+
+    prompt = request.form.get(
+        "prompt",
+        "Analyze this image in detail."
+    )
+
+    tmp_path = None
+
     try:
-        question = ""
-        image_data_url = None
 
-        if "image" in request.files:
-            file = request.files["image"]
-            if not file or file.filename == "":
-                return jsonify(ok=False, error="No image selected"), 400
-            ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
-            if ext not in IMAGE_EXTENSIONS:
-                return jsonify(ok=False, error="Unsupported image type"), 400
-            raw = file.read()
-            if len(raw) > 20 * 1024 * 1024:
-                return jsonify(ok=False, error="Image too large (max 20MB)"), 400
-            mime = "image/jpeg" if ext == "jpg" else f"image/{ext}"
-            image_data_url = f"data:{mime};base64,{base64.b64encode(raw).decode('utf-8')}"
-            question = request.form.get("question", "")
-        else:
-            req = request.get_json(silent=True) or {}
-            image_data_url = req.get("image_url") or req.get("image_data_url")
-            question = req.get("question", "")
+        client = genai.Client(
+            api_key=os.getenv("GEMINI_API_KEY")
+        )
 
-        if not image_data_url:
-            return jsonify(ok=False, error="image is required"), 400
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
 
-        reply = call_ai_vision(image_data_url, question or "Describe this image in detail.")
-        if not reply:
-            return jsonify(ok=False, error="Vision analysis failed — check OPENROUTER_API_KEY is configured for a vision-capable model."), 500
+            tmp_path = tmp.name
+            image.save(tmp_path)
 
-        return jsonify(ok=True, message=reply)
+        img = Image.open(tmp_path)
+
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[
+                prompt,
+                img
+            ]
+        )
+
+        return jsonify({
+            "ok": True,
+            "response": response.text
+        })
+
     except Exception as e:
+
+        import traceback
         traceback.print_exc()
-        return jsonify(ok=False, error=str(e)), 500
+
+        return jsonify({
+            "ok": False,
+            "message": str(e)
+        }), 500
+
+    finally:
+
+        if tmp_path and os.path.exists(tmp_path):
+            os.remove(tmp_path)
 
 # =============================================================================
 # WEBSITE & PROJECT BUILDERS
@@ -2927,20 +2986,22 @@ def api_google_login():
     try:
         print("Firebase Project ID:", firebase_admin.get_app().project_id)
         decoded_token = firebase_auth.verify_id_token(id_token)
+
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        print("Google Login Verify Error:", repr(e))
+       import traceback
+    traceback.print_exc()
+    print("Google Login Verify Error:", repr(e))
 
     return jsonify({
         "ok": False,
         "message": str(e)
     }), 401
 
+
     uid = decoded_token.get("uid")
     email = (decoded_token.get("email") or "").strip().lower()
     name = decoded_token.get("name") or (email.split("@")[0] if email else "User")
-    picture = decoded_token.get("picture")  # extracted per spec; no `picture`
+    picture = decoded_token.get("picture") # extracted per spec; no `picture`
                                              # column exists on users yet, so
                                              # it isn't persisted — add one if
                                              # you want it stored.
