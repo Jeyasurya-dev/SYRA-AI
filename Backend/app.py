@@ -2244,7 +2244,7 @@ def vision():
             "message": "Only JPG, JPEG, PNG, WEBP and GIF images are allowed."
         }), 400
 
-    MAX_IMAGE_SIZE = 25 * 1024 * 1024  # 25 MB
+    MAX_IMAGE_SIZE = 25 * 1024 * 1024
 
     image.seek(0, os.SEEK_END)
     size = image.tell()
@@ -2265,16 +2265,35 @@ def vision():
 
     try:
 
+        api_key = os.getenv("GEMINI_API_KEY")
+
+        if not api_key:
+            return jsonify({
+                "ok": False,
+                "message": "GEMINI_API_KEY not found."
+            }), 500
+
+        print("=" * 60)
+        print("VISION API STARTED")
+        print("Filename :", image.filename)
+        print("Size     :", size)
+        print("Prompt   :", prompt)
+        print("API Key  :", api_key[:10] + "...")
+        print("=" * 60)
+
         client = genai.Client(
-            api_key=os.getenv("GEMINI_API_KEY")
+            api_key=api_key
         )
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
-
             tmp_path = tmp.name
             image.save(tmp_path)
 
+        print("Temporary File :", tmp_path)
+
         img = Image.open(tmp_path)
+
+        print("Image Loaded")
 
         response = client.models.generate_content(
             model="gemini-2.5-flash",
@@ -2284,6 +2303,8 @@ def vision():
             ]
         )
 
+        print("Gemini Success")
+
         return jsonify({
             "ok": True,
             "response": response.text
@@ -2291,19 +2312,18 @@ def vision():
 
     except Exception as e:
 
-        import traceback
         traceback.print_exc()
 
         return jsonify({
             "ok": False,
-            "message": str(e)
+            "message": str(e),
+            "type": type(e).__name__
         }), 500
 
     finally:
 
         if tmp_path and os.path.exists(tmp_path):
             os.remove(tmp_path)
-
 # =============================================================================
 # WEBSITE & PROJECT BUILDERS
 # =============================================================================

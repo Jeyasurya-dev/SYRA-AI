@@ -1576,19 +1576,87 @@ function openSearchTab() {
 // Mirrors the backend's === FILE: path === parser so the explorer can be
 // built purely from the `code` field already in the API response.
 function parseFilesClient(content) {
+
   const files = {};
-  const regex = /===\s*FILE:\s*(.+?)\s*===\n([\s\S]*?)(?=(?:===\s*FILE:)|$)/gi;
+
+  if (!content) return files;
+
+  // ===== FILE FORMAT =====
+  const fileRegex = /===\s*FILE:\s*(.+?)\s*===\s*([\s\S]*?)(?=(?:===\s*FILE:)|$)/gi;
+
   let match;
-  while ((match = regex.exec(content || "")) !== null) {
-    const path = match[1].trim();
-    let code = match[2].trim();
-    code = code.replace(/^```[a-zA-Z0-9]*\n/, "").replace(/\n```$/, "");
-    files[path] = code.trim();
+
+  while ((match = fileRegex.exec(content)) !== null) {
+
+    files[match[1].trim()] = match[2].trim();
+
   }
-  if (Object.keys(files).length === 0 && content) {
-    files["output.txt"] = content;
+
+  if (Object.keys(files).length) return files;
+
+  // ===== Markdown HTML =====
+  const html = content.match(/```html([\s\S]*?)```/i);
+  const css = content.match(/```css([\s\S]*?)```/i);
+  const js = content.match(/```(?:javascript|js)([\s\S]*?)```/i);
+
+  if (html) files["index.html"] = html[1].trim();
+  if (css) files["style.css"] = css[1].trim();
+  if (js) files["script.js"] = js[1].trim();
+
+  if (Object.keys(files).length) return files;
+
+  // ===== Inline HTML =====
+
+  if (/<html/i.test(content)) {
+
+      let htmlCode = content;
+
+      let cssCode = "";
+
+      let jsCode = "";
+
+      htmlCode = htmlCode.replace(
+
+        /<style[^>]*>([\s\S]*?)<\/style>/i,
+
+        (_, c) => {
+
+            cssCode = c.trim();
+
+            return '<link rel="stylesheet" href="style.css">';
+
+        }
+
+      );
+
+      htmlCode = htmlCode.replace(
+
+        /<script[^>]*>([\s\S]*?)<\/script>/i,
+
+        (_, c) => {
+
+            jsCode = c.trim();
+
+            return '<script src="script.js"></script>';
+
+        }
+
+      );
+
+      files["index.html"] = htmlCode.trim();
+
+      if (cssCode) files["style.css"] = cssCode;
+
+      if (jsCode) files["script.js"] = jsCode;
+
+      return files;
+
   }
+
+  files["output.txt"] = content;
+
   return files;
+
 }
 
 // Inlines matching CSS/JS into the HTML file so it can be shown in an
@@ -1600,12 +1668,44 @@ function buildPreviewDoc(files) {
   let html = files[htmlFile];
   const cssFile = names.find(f => /\.css$/i.test(f));
   const jsFile = names.find(f => /\.js$/i.test(f));
-  if (cssFile && !/<link[^>]*stylesheet/i.test(html)) {
-    html = /<\/head>/i.test(html) ? html.replace(/<\/head>/i, `<style>${files[cssFile]}</style></head>`) : `<style>${files[cssFile]}</style>` + html;
-  }
-  if (jsFile && !/<script[^>]*src=/i.test(html)) {
-    html = /<\/body>/i.test(html) ? html.replace(/<\/body>/i, `<script>${files[jsFile]}<\/script></body>`) : html + `<script>${files[jsFile]}<\/script>`;
-  }
+  if (cssFile) {
+
+    html = html.replace(
+
+        /<link[^>]*stylesheet[^>]*>/gi,
+
+        ""
+
+    );
+
+    html = html.replace(
+
+        /<\/head>/i,
+
+        `<style>${files[cssFile]}</style></head>`
+
+    );
+
+}
+  if (jsFile) {
+
+    html = html.replace(
+
+        /<script[^>]*src=.*?<\/script>/gis,
+
+        ""
+
+    );
+
+    html = html.replace(
+
+        /<\/body>/i,
+
+        `<script>${files[jsFile]}<\/script></body>`
+
+    );
+
+}
   return html;
 }
 
